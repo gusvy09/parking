@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <link rel = "stylesheet" href = "../static\\hello.css">
+    <title>auto parking</title>
+  </head>
+  <body class = "ground">
+    <div class = "popup-container" id = "complete">
+      <!-- 동작완료 팝업창 -->
+      <p>완료</p>
+      <button class = "popup-button" onclick = "closePopup()">확인</button>
+    </div>
+    <div class = "tabs">
+      <div class = "btnContainer">
+        <button onclick=showmember()>주차관리</button>
+    </div>
+    </div>
+    <div class = "parkingzone">
+      <div class = "zone">
+        <div class = "car" id = "car1"><button class = "btn_park" id = "p1" onclick = hello(this)>park</button></div>
+        <div class = "car" id = "car2"><button class = "btn_park" id = "p2" onclick = hello(this)>park</button></div>
+      </div>
+      <div class = "zone">
+        <div class = "car" id = "car3"><button class = "btn_park" id = "p3" onclick = hello(this)>park</button></div>
+        <div class = "car" id = "car4"><button class = "btn_park" id = "p4" onclick = hello(this)>park</button></div>
+      </div>
+      <div class = "zone">
+        <div class = "car" id = "car5"><button class = "btn_park" id = "p5" onclick = hello(this)>park</button></div>
+        <div class = "car" id = "car6"><button class = "btn_park" id = "p6" onclick = hello(this)>park</button></div>
+      </div>
+      <div class = "zone">
+        <div class = "handi_car" id = "car7"><button class = "btn_park" id = "p7" onclick = hello(this)>park</button></div>
+        <div class  = "car_info">
+          <input type = "text" id = "car_no" size = "10" placeholder = "차량번호" >
+          <button onclick=function_car()>입차</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      // 전달 받은 데이터를 저장
+      var jsondata = JSON.parse('{{test|tojson|safe|replace("\'","\'")}}');
+      // 로딩될때 사용하고 있는 주차자리 빨간색으로 변경
+      // num_infocar : 주차등록이 되어있는 차량의 수
+      // list_parkno : 사용하고 있는 주차자리 리스트
+      window.onload = function(){
+        console.log(jsondata.num_infocar);
+        console.log("남은 자리  : " + (6-jsondata.list_carzone.length).toString())
+        //console.log(jsondata.list_carno);
+        for(var i=0;i<jsondata.list_carzone.length;i++){
+            let carid = document.getElementById(jsondata.list_carzone[i]);
+            carid.style.borderColor = 'red';
+        }
+      }
+      // 주차장 선 div id 구해서 넘겨주기
+      function hello(clicked_id){
+        //주차장 선. div의 id값(demo) ex. car1,car2
+        let demo = clicked_id.parentNode.getAttribute('id'); 
+        console.log(demo);
+        //div의 id를 이용하여 엘리멘트를 가져옴
+        let tag = document.getElementById(demo);
+        //해당 element의 보더가 빨간색이면->초록색으로 바꿈
+        //id를 이용하여 db에 주차자리 삭제
+        if (tag.style.borderColor === 'red'){
+          send_to(demo,'red');
+          if(demo == 'car7')
+          {
+            tag.style.borderColor = '#0000ff';
+          }
+          else{
+            tag.style.borderColor = '#00ff00';
+          }
+        }
+        else{
+          send_to(demo,'green');
+          tag.style.borderColor = 'red';
+        }
+      }
+      //자리에 해당하는 div id값과 현재 색깔 data 보내기
+      function send_to(div_id,line_color){
+        // ajax 요청 생성
+        var xhr = new XMLHttpRequest();
+        //요청 초기화
+        xhr.open("POST","/server_endpoint",true);
+          xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+          //전송(div의 id값, 주차선 색깔)
+          xhr.send(JSON.stringify(div_id + " " +line_color));
+
+          xhr.onload = function()
+          {
+            if (xhr.status === 200) 
+            {
+              console.log("요청이 성공적으로 완료되었습니다.");
+              // 서버 응답 처리
+              var response = JSON.parse(xhr.responseText);
+              console.log("서버 응답:", response);
+              location.reload(true);
+            } 
+            else 
+            {
+              console.error("오류 발생:", xhr.status, xhr.statusText);
+            }
+          } 
+      }
+      function send_carno(no){
+        var xpr = new XMLHttpRequest();
+        //요청 초기화
+        xpr.open("POST","/server_endpoint",true);
+          xpr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+          //전송(차량번호)
+          xpr.send(JSON.stringify(no));
+
+          xpr.onload = function()
+          {
+            if (xpr.status === 200) 
+            {
+              console.log("요청이 성공적으로 완료되었습니다.");
+              // 서버 응답 처리
+              var response = JSON.parse(xpr.responseText);
+              console.log("서버 응답:", response);
+              if (response.exist_car){
+                showPopup();
+              }
+            } 
+            else 
+            {
+              console.error("오류 발생:", xpr.status, xpr.statusText);
+            }
+          } 
+      }
+      //입차할때 차량번호 공백제거한뒤 백그라운드로 정보 넘김
+      function function_car(){
+        let car_no = document.getElementById("car_no");
+        let text_car_no = car_no.value;
+        // 백그라운드로 정보 넘기기
+        send_carno(text_car_no.replace(/ /g,"")); // 문자열 내의 공백 없애기
+        car_no.value = "";
+      }
+      // 팝업창 띄우기
+      // 등록된 주차목록 가져오는 메서드
+      function showmember() {
+        window.open("/member","member",`width=300,height=600,left=100,top=70`);
+      }
+      // 동작완료 팝업 나타내는 함수
+      function showPopup(){
+            let popup = document.getElementById("complete");
+            popup.style.display = "block";
+      }
+      // 동작완료 팝업창 숨김
+      function closePopup() {
+            let popup = document.getElementById("complete");
+            popup.style.display = "none";
+      }
+    </script>
+  </body>
+</html>
+

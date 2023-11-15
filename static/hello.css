@@ -1,0 +1,71 @@
+/*park.html에 적용되는 css*/
+.ground {
+  background-color: darkgray;
+  margin: 10px;
+}
+.car{
+  margin : 20px; 
+  padding : 30px;
+  border : 10px solid rgb(0,255,0);
+  border-radius : 2px;
+  height: 100px;
+  width: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.handi_car{
+  margin : 20px; 
+  padding : 30px;
+  border : 10px solid rgb(0,0,255);
+  border-radius : 2px;
+  height: 100px;
+  width: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.zone{
+  display: flex;
+  justify-content: space-between;
+}
+.parkingzone{
+  align-items :center;
+}
+.btn_park{
+  height: 40px;
+  width: 45px;
+}
+.btnContainer{
+  margin-left: 18px;
+}
+.car_info{
+  margin-right: 200px;
+  align-items: end;
+  justify-content: space-between;
+  display: flex;
+  width: 13%;
+  height: 200px;
+  padding: 10px;
+}
+/*member.html에 적용되는 css*/
+.popup-container {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+/*버튼 스타일 */
+.popup-button {
+  padding: 10px 20px;
+  background-color: #0078d4;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
